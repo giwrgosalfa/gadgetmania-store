@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GadgetMania</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body class="bg-gray-100 text-gray-900">
+  <!-- Header -->
+  <header class="bg-white shadow-md">
+    <div class="max-w-7xl mx-auto flex justify-between items-center py-4 px-6">
+      <h1 class="text-2xl font-bold text-indigo-600">GadgetMania</h1>
+      <nav class="space-x-6 flex items-center">
+        <a href="#" class="hover:text-indigo-600">Αρχική</a>
+        <a href="#products" class="hover:text-indigo-600">Προϊόντα</a>
+        <a href="#offers" class="hover:text-indigo-600">Προσφορές</a>
+        <a href="#contact" class="hover:text-indigo-600">Επικοινωνία</a>
+        <button onclick="toggleCart()" class="ml-4 relative">
+          🛒 <span id="cart-count" class="absolute -top-2 -right-3 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+  <section class="bg-indigo-600 text-white py-20 px-6">
+    <div class="max-w-4xl mx-auto text-center">
+      <h2 class="text-4xl font-bold mb-4">Καλώς ήρθες στο GadgetMania</h2>
+      <p class="text-lg mb-6">Ανακάλυψε τα πιο καινοτόμα gadgets της αγοράς!</p>
+      <a href="#products" class="bg-white text-indigo-600 font-semibold px-6 py-3 rounded-full shadow hover:bg-gray-100 transition">Αγόρασε Τώρα</a>
+    </div>
+  </section>
+  <section id="products" class="py-16 px-6">
+    <div class="max-w-7xl mx-auto">
+      <h3 class="text-3xl font-bold mb-10 text-center">Δημοφιλή Προϊόντα</h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div class="bg-white p-4 rounded-xl shadow">
+          <img src="https://via.placeholder.com/300x200" alt="Gadget" class="w-full h-40 object-cover rounded-md mb-4">
+          <h4 class="text-lg font-semibold">Smartwatch X10</h4>
+          <p class="text-sm text-gray-600 mb-2">Έξυπνο ρολόι με παρακολούθηση υγείας.</p>
+          <span class="block font-bold text-indigo-600 mb-2">€49.99</span>
+          <button onclick="addToCart('Smartwatch X10', 49.99)" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 w-full">Προσθήκη στο Καλάθι</button>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="bg-white py-16 px-6">
+    <div class="max-w-6xl mx-auto text-center">
+      <h3 class="text-3xl font-bold mb-10">Γιατί να επιλέξεις εμάς;</h3>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div><h4 class="text-xl font-semibold">Δωρεάν Αποστολή</h4><p class="text-gray-600">Σε όλες τις παραγγελίες άνω των €30.</p></div>
+        <div><h4 class="text-xl font-semibold">24/7 Υποστήριξη</h4><p class="text-gray-600">Είμαστε δίπλα σου κάθε στιγμή.</p></div>
+        <div><h4 class="text-xl font-semibold">Επιστροφή Χρημάτων</h4><p class="text-gray-600">Επιστροφή εντός 14 ημερών.</p></div>
+      </div>
+    </div>
+  </section>
+  <div id="cart-panel" class="fixed top-0 right-0 w-80 h-full bg-white shadow-lg p-6 transform translate-x-full transition-transform duration-300 z-50 overflow-y-auto">
+    <h3 class="text-2xl font-bold mb-4">Το Καλάθι μου</h3>
+    <ul id="cart-items" class="mb-4"></ul>
+    <p class="font-bold">Σύνολο: €<span id="cart-total">0.00</span></p>
+    <form id="checkout-form" method="POST" action="https://gadgetmania-server.onrender.com/create-checkout-session">
+      <input type="hidden" name="items" id="cart-data" />
+      <button type="submit" class="mt-4 bg-green-600 text-white px-4 py-2 rounded w-full hover:bg-green-700">Ολοκλήρωση</button>
+    </form>
+  </div>
+  <footer class="bg-gray-800 text-white py-8 px-6" id="contact">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between">
+      <div class="mb-6 md:mb-0">
+        <h5 class="text-xl font-bold mb-2">GadgetMania</h5>
+        <p>Το κατάστημα για τους λάτρεις της τεχνολογίας.</p>
+      </div>
+      <div>
+        <h5 class="text-xl font-bold mb-2">Επικοινωνία</h5>
+        <p>Email: info@gadgetmania.gr</p>
+        <p>Τηλ: +30 210 1234567</p>
+      </div>
+    </div>
+  </footer>
+  <script>
+    let cart = [];
+    function addToCart(name, price) {
+      cart.push({ name, price });
+      updateCart();
+    }
+    function updateCart() {
+      const itemsContainer = document.getElementById('cart-items');
+      const cartTotal = document.getElementById('cart-total');
+      const cartCount = document.getElementById('cart-count');
+      const cartData = document.getElementById('cart-data');
+      itemsContainer.innerHTML = '';
+      let total = 0;
+      const lineItems = [];
+      cart.forEach((item, index) => {
+        total += item.price;
+        lineItems.push({ name: item.name, price: item.price });
+        const li = document.createElement('li');
+        li.className = 'flex justify-between items-center border-b py-2';
+        li.innerHTML = `<span>${item.name}</span>
+          <div class="flex items-center gap-2">
+            <span>€${item.price.toFixed(2)}</span>
+            <button onclick="removeFromCart(${index})" class="text-red-500">✕</button>
+          </div>`;
+        itemsContainer.appendChild(li);
+      });
+      cartTotal.textContent = total.toFixed(2);
+      cartCount.textContent = cart.length;
+      cartData.value = JSON.stringify(lineItems);
+    }
+    function removeFromCart(index) {
+      cart.splice(index, 1);
+      updateCart();
+    }
+    function toggleCart() {
+      const panel = document.getElementById('cart-panel');
+      panel.classList.toggle('translate-x-full');
+    }
+  </script>
+</body>
+</html>
